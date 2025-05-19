@@ -10,7 +10,7 @@ import java.time.LocalDate
 data class Task (
     @PrimaryKey(autoGenerate = true)val taskId : Long = 0,
     val taskTitle : String,
-    val taskDescription : String,
+    val taskPriority : Int = 0,
     val isCompleted : Boolean,
     val dateTaskAdded : String = LocalDate.now().toString(),
     val isReminderSet : Boolean

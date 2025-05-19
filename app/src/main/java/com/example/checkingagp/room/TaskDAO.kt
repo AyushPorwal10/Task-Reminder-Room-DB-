@@ -20,7 +20,7 @@ interface TaskDAO {
     @Query("DELETE FROM task_table WHERE taskId = :taskId")
     suspend fun deleteTask(taskId : Long)
 
-    @Query("Select * from task_table Order By isCompleted ASC")
+    @Query("Select * from task_table Order By isCompleted ASC , taskPriority DESC")
      fun fetchAllTask() : Flow<List<Task>>
 
      @Query("Select * from task_table where taskId = :taskId")

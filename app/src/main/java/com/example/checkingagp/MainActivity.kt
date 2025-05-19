@@ -37,7 +37,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            TaskListScreen(taskViewModel)
+            CheckingAGPTheme {
+                TaskListScreen(taskViewModel)
+            }
         }
     }
 }

@@ -1,21 +1,29 @@
 package com.example.checkingagp.notification
 
 import android.app.TimePickerDialog
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,9 +46,10 @@ fun AddTaskDialog(onDismiss: () -> Unit, taskViewModel: TaskViewModel) {
     val taskTitle = remember {
         mutableStateOf("")
     }
+    val choosenPriority = remember {
+        mutableIntStateOf(0)
+    }
     val timeInMillis = remember { mutableStateOf(10L) }
-
-    val taskDescription = remember { mutableStateOf("") }
 
     var selectedTime by remember { mutableStateOf("") }
 
@@ -62,26 +71,30 @@ fun AddTaskDialog(onDismiss: () -> Unit, taskViewModel: TaskViewModel) {
                     label = {
                         Text("Title")
                     },
-                     colors = Helper.TextFieldStyle.myTextFieldColor(),
+                    colors = Helper.TextFieldStyle.myTextFieldColor(),
                     placeholder = {
                         Text("Enter task title")
                     })
 
                 Spacer(modifier = Modifier.height(6.dp))
 
+                Text("Priority", style = MaterialTheme.typography.bodyMedium)
 
-                OutlinedTextField(
-                    value = taskDescription.value,
-                    onValueChange = { taskDescription.value = it },
-                    colors = Helper.TextFieldStyle.myTextFieldColor(),
-                    label = {
-                        Text("Description")
-                    },
-                    shape = RoundedCornerShape(22.dp),
-                    placeholder = {
-                        Text("Enter task description")
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()) {
+                    Priority("Low",choosenPriority.intValue == 0 ,  onSelected = {
+                        choosenPriority.intValue = 0
                     })
-
+                    Priority("Medium",choosenPriority.intValue == 1 ,  onSelected = {
+                        choosenPriority.intValue = 1
+                    })
+                    Priority("High",choosenPriority.intValue == 2 ,  onSelected = {
+                        choosenPriority.intValue = 2
+                    })
+                }
                 IconButton(
                     onClick = {
                         val timePickerDialog = TimePickerDialog(
@@ -115,12 +128,12 @@ fun AddTaskDialog(onDismiss: () -> Unit, taskViewModel: TaskViewModel) {
                     taskViewModel.addTask(
                         Task(
                             taskTitle = taskTitle.value,
-                            taskDescription = taskDescription.value,
+                            taskPriority = choosenPriority.intValue,
                             isCompleted = false,
                             isReminderSet = selectedTime.isNotEmpty()
                         ),
-                        onTaskAdded = {taskId->
-                            if(taskId != -1L){
+                        onTaskAdded = { taskId ->
+                            if (taskId != -1L) {
                                 ScheduleNotification.scheduleNotification(
                                     context,
                                     taskTitle.value,
@@ -133,11 +146,26 @@ fun AddTaskDialog(onDismiss: () -> Unit, taskViewModel: TaskViewModel) {
                     )
                     onDismiss()
                 },
-                enabled = taskTitle.value.trim().isNotEmpty() && taskDescription.value.trim()
-                    .isNotEmpty()
+                enabled = taskTitle.value.trim().isNotEmpty()
             ) {
                 Text("Add Task")
             }
         }
     )
+}
+
+@Composable
+fun Priority(priority: String, selected: Boolean, onSelected: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(end = 5.dp)
+    ) {
+        RadioButton(selected = selected, onClick = {
+            onSelected()
+        })
+
+        Text(priority, modifier = Modifier.clickable {
+            onSelected()
+        })
+    }
 }
